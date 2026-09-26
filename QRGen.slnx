@@ -1,0 +1,7 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="QRGen.vcxproj" Id="017aba92-261f-4d14-abe2-834edf7cbf81" />
+</Solution>

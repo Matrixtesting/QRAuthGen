@@ -1,0 +1,188 @@
+################################################################################
+# Visual Studio 2026 / MSVC - sane defaults
+# Keep: source code, .sln, .vcxproj, .filters, .props, .targets, .natvis, etc.
+################################################################################
+
+# --- User-specific files ---
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.VC.db
+*.VC.VC.opendb
+.vs/
+
+# --- Build results ---
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+[Bb]uild/
+[Bb]uild*/
+[Ll]ogs/
+
+# CMake / Ninja (if you ever use it from VS)
+CMakeFiles/
+CMakeCache.txt
+CMakeScripts/
+Testing/
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+out/
+.vscode/
+
+
+# ============================================================
+# Visual Studio 2022
+# ============================================================
+
+# Visual Studio local workspace/cache
+.vs/
+
+# User-specific Visual Studio settings
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.VC.db
+*.VC.VC.opendb
+*.opendb
+
+# Visual Studio database/cache files
+*.db
+*.db-shm
+*.db-wal
+*.ipch
+ipch/
+
+
+# --- MSVC intermediate & output files ---
+*.obj
+*.iobj
+*.ipdb
+*.pdb
+*.ilk
+*.idb
+*.pch
+*.pchi
+*.res
+*.aps
+*.exp
+*.lib
+# *.dll
+# *.exe
+*.appx
+*.appxbundle
+*.msix
+*.msixbundle
+*.csv
+
+# Linker/Compiler logs and temp
+*.tlog
+*.log
+*.tmp
+*.cache
+*.lastbuildstate
+*.recipe
+*.opendb
+*.db
+
+# --- Precompiled headers / generated headers ---
+*.gch
+
+# --- Debugger / profiler ---
+*.dmp
+*.dump
+*.mdmp
+*.etl
+*.vsp
+*.vspx
+*.sap
+*.njsproj.user
+*.psess
+*.vspq
+*.vspscc
+*.vsmdi
+
+# --- Visual Studio test results ---
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+*.coverage
+*.coveragexml
+*.vsp
+*.vspx
+*.sap
+
+
+# --- NuGet (if applicable) ---
+packages/
+*.nupkg
+*.snupkg
+.nuget/
+# If you want to keep packages.config but not restore outputs, above is fine.
+
+# --- Windows / OS junk ---
+Thumbs.db
+Thumbs.db:encryptable
+Desktop.ini
+$RECYCLE.BIN/
+
+*.swp
+*.swo
+*~
+
+# --- ReSharper / Rider / tooling ---
+_ReSharper*/
+*.DotSettings.user
+.idea/
+
+# --- Static analysis / CodeQL / others (optional) ---
+*.sarif
+
+################################################################################
+# Project-specific: logs / runtime artifacts
+################################################################################
+
+CurrentDebugRun.txt
+qr_bitmap.csv
+authenticator.bmp
+initiateGHSync.bat
+GitProjectSetupLocal.bat
+
+
+
+
+
+
+
+# Debug logs (keep if you want them versioned; otherwise ignore)
+*.trace
+*.dbglog
+debug_log*.txt
+*.log
+
+# Common runtime/config artifacts (edit to match your project)
+*.pid
+*.seed
+*.bak
+*.swp
+
+################################################################################
+# Source-control bindings (usually do NOT commit unless your org requires it)
+################################################################################
+*.vssscc
+*.vspscc
+
+################################################################################
+# OPTIONAL: If you build installers or publish artifacts, ignore them
+################################################################################
+# *.msi
+# *.cab
+# *.zip
+# *.7z
