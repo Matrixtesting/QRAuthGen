@@ -1,67 +1,65 @@
 // QRGen.cpp : This file contains the 'main' function. Program execution begins and ends there.
-/*
- * qr_authenticator.c
- *
- * Fixed QR Code Encoder
- * ---------------------
- * QR Version:          7
- * Error Correction:    M
- * Encoding:            Byte mode
- * QR matrix:           45 x 45 modules
- * Output bitmap:       128 x 128 pixels
- * Bitmap format:       1 bit per pixel
- *
- * Intended for:
- *   - Microsoft Visual Studio testing
- *   - Later migration to a 32-bit MCU
- *
- * No external QR libraries required.
- * 
-| Parameter | Value           | Meaning                       |
-|---        |---              |---                            |
-| Type      | `totp`          | Time-based OTP                |
-| Secret    | Base32          | Shared cryptographic secret   |
-| Issuer    | `MyApplication` | Your server/application       |
-| Algorithm | `SHA1`          | HMAC-SHA1                     |
-| Digits    | `6`             | Six-digit authentication code | ** not required, default is 6 **
-| Period    | `30`            | New code every 30 seconds     | ** not required, default is 30 **
-  
-For the QR capacity, maximum URI isabout 113 chars:
-otpauth://totp/IIIIIIIIII:UUUUUUUUUU?secret=SSSSSSSSSS&issuer=IIIIIIIIII&algorithm=SHA1&digits=6&period=30
-
-A fixed QR Version 6, error-correction level M has enough byte-mode capacity for this size. Its native matrix is 41×41 modules.
-For a 128×128 bitmap, a good representation is:
-
-QR Version:       6
-QR matrix:        41 x 41 modules
-Quiet zone:       4 modules each side
-Total:            49 x 49 modules
-
-Scale:            2 pixels/module
-Rendered QR:      98 x 98 pixels
-Canvas:           128 x 128 pixels
-Border remaining: 15 pixels each side 
-  
-  
-unsigned char qr_text[QR_MAX_TEXT] =
-    "otpauth://totp/"
-    "MyApp:user01"
-    "?secret=JBSWY3DPEH"
-    "&issuer=MyApp"
-    "&algorithm=SHA1"
-    "&digits=6"
-    "&period=30";
-
-int qr_encode_128(const unsigned char *text,unsigned char *bitmap);
-
-int qr_write_bmp(const char *filename,const unsigned char *bitmap);
-  
-  
-  
-  
-  
-  
- */
+// qr_authenticator.c
+//
+// Fixed QR Code Encoder
+// ---------------------
+// QR Version:          7
+// Error Correction:    M
+// Encoding:            Byte mode
+// QR matrix:           45 x 45 modules
+// Output bitmap:       128 x 128 pixels
+// Bitmap format:       1 bit per pixel
+//
+// Intended for:
+//   - Microsoft Visual Studio testing
+//   - Later migration to a 32-bit MCU
+//
+// No external QR libraries required.
+//
+// | Parameter | Value           | Meaning                       |
+// |---        |---              |---                            |
+// | Type      | `totp`          | Time-based OTP                |
+// | Secret    | Base32          | Shared cryptographic secret   |
+// | Issuer    | `MyApplication` | Your server/application       |
+// | Algorithm | `SHA1`          | HMAC-SHA1                     |
+// | Digits    | `6`             | Six-digit authentication code | ** not required, default is 6 **
+// | Period    | `30`            | New code every 30 seconds     | ** not required, default is 30 **
+//
+// For the QR capacity, maximum URI isabout 113 chars:
+// otpauth://totp/IIIIIIIIII:UUUUUUUUUU?secret=SSSSSSSSSS&issuer=IIIIIIIIII&algorithm=SHA1&digits=6&period=30
+//
+// A fixed QR Version 6, error-correction level M has enough byte-mode capacity for this size. Its native matrix is 41×41 modules.
+// For a 128×128 bitmap, a good representation is:
+//
+// QR Version:       6
+// QR matrix:        41 x 41 modules
+// Quiet zone:       4 modules each side
+// Total:            49 x 49 modules
+//
+// Scale:            2 pixels/module
+// Rendered QR:      98 x 98 pixels
+// Canvas:           128 x 128 pixels
+// Border remaining: 15 pixels each side
+//
+//
+// unsigned char qr_text[QR_MAX_TEXT] =
+// "otpauth://totp/"
+// "MyApp:user01"
+// "?secret=JBSWY3DPEH"
+// "&issuer=MyApp"
+// "&algorithm=SHA1"
+// "&digits=6"
+// "&period=30";
+//
+// int qr_encode_128(const unsigned char *text,unsigned char *bitmap);
+//
+// int qr_write_bmp(const char *filename,const unsigned char *bitmap);
+//
+//
+//
+//
+//
+//
 
 #include <stdio.h>
 #include <stdint.h>
@@ -101,30 +99,26 @@ static int Windows_GetRandomBytes(unsigned char* buffer,unsigned int length)
 #endif
 }
 
-/*
- * ================================================================
- * DEBUG CONSOLE + FILE OUTPUT
- * ================================================================
- *
- * All DEBUG_Print() output is written to:
- *
- *     1. Console
- *     2. CurrentDebugRun.txt
- *
- * DEBUG_Start() opens the file using "w", so the previous
- * run is automatically erased.
- */
+// ================================================================
+// DEBUG CONSOLE + FILE OUTPUT
+// ================================================================
+//
+// All DEBUG_Print() output is written to:
+//
+//     1. Console
+//     2. CurrentDebugRun.txt
+//
+// DEBUG_Start() opens the file using "w", so the previous
+// run is automatically erased.
 
 #include <stdarg.h>
 
 static FILE* debug_file = NULL;
 
 
-/*
- * ------------------------------------------------------------
- * START DEBUG LOG
- * ------------------------------------------------------------
- */
+// ------------------------------------------------------------
+// START DEBUG LOG
+// ------------------------------------------------------------
 
 int DEBUG_Start(void)
 {
@@ -147,13 +141,11 @@ int DEBUG_Start(void)
 }
 
 
-/*
- * ------------------------------------------------------------
- * DEBUG PRINT
- * ------------------------------------------------------------
- *
- * Works like printf(), but writes identical formatted output to both the console and the current debug log.
- */
+// ------------------------------------------------------------
+// DEBUG PRINT
+// ------------------------------------------------------------
+//
+// Works like printf(), but writes identical formatted output to both the console and the current debug log.
 
 void DEBUG_Print(const char* format, ...)
 {
@@ -174,11 +166,9 @@ void DEBUG_Print(const char* format, ...)
 }
 
 
-/*
- * ------------------------------------------------------------
- * CLOSE DEBUG LOG
- * ------------------------------------------------------------
- */
+// ------------------------------------------------------------
+// CLOSE DEBUG LOG
+// ------------------------------------------------------------
 
 void DEBUG_Stop(void)
 {
@@ -190,9 +180,9 @@ void DEBUG_Stop(void)
 }
 
 
- /* ================================================================
-  * CONFIGURATION
-  * ================================================================ */
+ // ================================================================
+ // CONFIGURATION
+ // ================================================================
 
 #define QR_VERSION          7
 #define QR_SIZE             45
@@ -205,22 +195,20 @@ void DEBUG_Stop(void)
 
 #define QR_SCALE            2
 
-  /*
-   * Version 7 / ECC M
-   *
-   * Total codewords: 196
-   *
-   * Reed-Solomon block structure:
-   *
-   * 4 blocks:
-   *      31 data + 18 ECC
-   *
-   * Total data:
-   *      124 codewords
-   *
-   * Total ECC:
-   *      72 codewords
-   */
+  // Version 7 / ECC M
+  //
+  // Total codewords: 196
+  //
+  // Reed-Solomon block structure:
+  //
+  // 4 blocks:
+  //      31 data + 18 ECC
+  //
+  // Total data:
+  //      124 codewords
+  //
+  // Total ECC:
+  //      72 codewords
 
 #define QR_DATA_CODEWORDS   124
 #define QR_ECC_PER_BLOCK    18
@@ -230,9 +218,9 @@ void DEBUG_Stop(void)
 #define QR_MAX_INPUT        120
 
 
-   /* ================================================================
-    * GLOBAL TEST STRING
-    * ================================================================ */
+   // ================================================================
+   // GLOBAL TEST STRING
+   // ================================================================
 
 unsigned char qr_plaintext[] =
 "otpauth://totp/"
@@ -244,41 +232,37 @@ unsigned char qr_plaintext[] =
 "&period=30";
 
 
-/*
- * Final MCU-friendly bitmap.
- *
- * 128 * 128 / 8 = 2048 bytes.
- *
- * Bit = 1 -> black
- * Bit = 0 -> white
- */
+// Final MCU-friendly bitmap.
+//
+// 128 * 128 / 8 = 2048 bytes.
+//
+// Bit = 1 -> black
+// Bit = 0 -> white
 
 unsigned char qr_bitmap[BMP_BUFFER_SIZE];
 
 
-/* ================================================================
- * INTERNAL QR STORAGE
- * ================================================================ */
+// ================================================================
+// INTERNAL QR STORAGE
+// ================================================================
 
- /*
-  * Matrix values:
-  *
-  * bit 0 = black/white
-  * bit 1 = reserved/function module
-  */
+ // Matrix values:
+ //
+ // bit 0 = black/white
+ // bit 1 = reserved/function module
 
 static uint8_t qr_matrix[QR_SIZE][QR_SIZE];
 
 
-/* Reed-Solomon working tables */
+// Reed-Solomon working tables
 
 static uint8_t gf_exp[512];
 static uint8_t gf_log[256];
 
 
-/* ================================================================
- * BIT STREAM WRITER
- * ================================================================ */
+// ================================================================
+// BIT STREAM WRITER
+// ================================================================
 
 typedef struct
 {
@@ -333,9 +317,9 @@ static int bitwriter_put(
 }
 
 
-/* ================================================================
- * GALOIS FIELD GF(256)
- * ================================================================ */
+// ================================================================
+// GALOIS FIELD GF(256)
+// ================================================================
 
 static void gf_initialize(void)
 {
@@ -373,9 +357,9 @@ static uint8_t gf_multiply(
 }
 
 
-/* ================================================================
- * REED-SOLOMON GENERATOR
- * ================================================================ */
+// ================================================================
+// REED-SOLOMON GENERATOR
+// ================================================================
 
 static void rs_generator(
     uint8_t* generator,
@@ -417,9 +401,9 @@ static void rs_generator(
 }
 
 
-/* ================================================================
- * REED-SOLOMON ENCODER
- * ================================================================ */
+// ================================================================
+// REED-SOLOMON ENCODER
+// ================================================================
 
 static void rs_encode(
     const uint8_t* data,
@@ -460,9 +444,9 @@ static void rs_encode(
 }
 
 
-/* ================================================================
- * QR MATRIX ACCESS
- * ================================================================ */
+// ================================================================
+// QR MATRIX ACCESS
+// ================================================================
 
 static void qr_set_function(
     int x,
@@ -496,9 +480,9 @@ static int qr_is_reserved(
 }
 
 
-/* ================================================================
- * FINDER PATTERN
- * ================================================================ */
+// ================================================================
+// FINDER PATTERN
+// ================================================================
 
 static void qr_draw_finder(
     int cx,
@@ -507,9 +491,7 @@ static void qr_draw_finder(
     int dx;
     int dy;
 
-    /*
-     * Includes the one-module white separator.
-     */
+    // Includes the one-module white separator.
 
     for (dy = -4; dy <= 4; dy++)
     {
@@ -544,9 +526,9 @@ static void qr_draw_finder(
 }
 
 
-/* ================================================================
- * ALIGNMENT PATTERN
- * ================================================================ */
+// ================================================================
+// ALIGNMENT PATTERN
+// ================================================================
 
 static void qr_draw_alignment(
     int cx,
@@ -581,17 +563,15 @@ static void qr_draw_alignment(
 }
 
 
-/* ================================================================
- * VERSION 7 FUNCTION PATTERNS
- * ================================================================ */
+// ================================================================
+// VERSION 7 FUNCTION PATTERNS
+// ================================================================
 
 static void qr_draw_function_patterns(void)
 {
-    /*
-     * Version 7 alignment centers:
-     *
-     * 6, 22, 38
-     */
+    // Version 7 alignment centers:
+    //
+    // 6, 22, 38
 
     static const int alignment[] =
     {
@@ -608,9 +588,7 @@ static void qr_draw_function_patterns(void)
     qr_draw_finder(3, QR_SIZE - 4);
 
 
-    /*
-     * Timing patterns
-     */
+    // Timing patterns
 
     for (i = 8; i < QR_SIZE - 8; i++)
     {
@@ -626,11 +604,9 @@ static void qr_draw_function_patterns(void)
     }
 
 
-    /*
-     * Alignment patterns.
-     *
-     * Skip combinations that overlap finder patterns.
-     */
+    // Alignment patterns.
+    //
+    // Skip combinations that overlap finder patterns.
 
     for (i = 0; i < 3; i++)
     {
@@ -654,9 +630,7 @@ static void qr_draw_function_patterns(void)
     }
 
 
-    /*
-     * Reserve format information areas.
-     */
+    // Reserve format information areas.
 
     for (i = 0; i < 9; i++)
     {
@@ -681,9 +655,7 @@ static void qr_draw_function_patterns(void)
     }
 
 
-    /*
-     * Dark module.
-     */
+    // Dark module.
 
     qr_set_function(
         8,
@@ -691,11 +663,9 @@ static void qr_draw_function_patterns(void)
         1);
 
 
-    /*
-     * Version information areas.
-     *
-     * Version >= 7 requires these.
-     */
+    // Version information areas.
+    //
+    // Version >= 7 requires these.
 
     {
         uint32_t version_bits;
@@ -705,10 +675,8 @@ static void qr_draw_function_patterns(void)
         version_bits = QR_VERSION << 12;
         rem = version_bits;
 
-        /*
-         * BCH generator:
-         * 0x1F25
-         */
+        // BCH generator:
+        // 0x1F25
 
         for (i = 17; i >= 12; i--)
         {
@@ -741,19 +709,17 @@ static void qr_draw_function_patterns(void)
 }
 
 
-/* ================================================================
- * FORMAT INFORMATION
- * ================================================================ */
+// ================================================================
+// FORMAT INFORMATION
+// ================================================================
 
 static uint16_t qr_format_bits(
     int mask)
 {
-    /*
-     * ECC M = binary 00
-     *
-     * Five-bit format value therefore consists
-     * only of the 3-bit mask number.
-     */
+    // ECC M = binary 00
+    //
+    // Five-bit format value therefore consists
+    // only of the 3-bit mask number.
 
     uint16_t data;
     uint16_t value;
@@ -766,9 +732,7 @@ static uint16_t qr_format_bits(
     value = (uint16_t)(data << 10);
     rem = value;
 
-    /*
-     * BCH generator = 0x537
-     */
+    // BCH generator = 0x537
 
     for (i = 14; i >= 10; i--)
     {
@@ -782,9 +746,7 @@ static uint16_t qr_format_bits(
 
     value |= rem;
 
-    /*
-     * Required QR format mask.
-     */
+    // Required QR format mask.
 
     value ^= 0x5412;
 
@@ -802,9 +764,7 @@ static void qr_draw_format_bits(
     bits = qr_format_bits(mask);
 
 
-    /*
-     * First copy around upper-left finder.
-     */
+    // First copy around upper-left finder.
 
     for (i = 0; i <= 5; i++)
         qr_set_function(8, i,
@@ -831,9 +791,7 @@ static void qr_draw_format_bits(
     }
 
 
-    /*
-     * Second copy.
-     */
+    // Second copy.
 
     for (i = 0; i < 8; i++)
     {
@@ -852,9 +810,7 @@ static void qr_draw_format_bits(
     }
 
 
-    /*
-     * Restore mandatory dark module.
-     */
+    // Restore mandatory dark module.
 
     qr_set_function(
         8,
@@ -863,9 +819,9 @@ static void qr_draw_format_bits(
 }
 
 
-/* ================================================================
- * DATA ENCODING
- * ================================================================ */
+// ================================================================
+// DATA ENCODING
+// ================================================================
 
 static int qr_create_data(
     const unsigned char* text,
@@ -880,10 +836,8 @@ static int qr_create_data(
     length = (int)strlen(
         (const char*)text);
 
-    /*
-     * Version 7 byte-mode character count
-     * uses 8 bits.
-     */
+    // Version 7 byte-mode character count
+    // uses 8 bits.
 
     if (length > QR_MAX_INPUT ||
         length > 255)
@@ -895,11 +849,9 @@ static int qr_create_data(
         QR_DATA_CODEWORDS);
 
 
-    /*
-     * Mode indicator:
-     *
-     * 0100 = byte mode
-     */
+    // Mode indicator:
+    //
+    // 0100 = byte mode
 
     if (bitwriter_put(
         &bw,
@@ -908,9 +860,7 @@ static int qr_create_data(
         return -1;
 
 
-    /*
-     * Character count
-     */
+    // Character count
 
     if (bitwriter_put(
         &bw,
@@ -919,9 +869,7 @@ static int qr_create_data(
         return -1;
 
 
-    /*
-     * Payload
-     */
+    // Payload
 
     for (i = 0; i < length; i++)
     {
@@ -933,9 +881,7 @@ static int qr_create_data(
     }
 
 
-    /*
-     * Terminator.
-     */
+    // Terminator.
 
     {
         int remaining;
@@ -958,9 +904,7 @@ static int qr_create_data(
     }
 
 
-    /*
-     * Pad to byte boundary.
-     */
+    // Pad to byte boundary.
 
     while (bw.bit_position & 7)
     {
@@ -968,11 +912,9 @@ static int qr_create_data(
     }
 
 
-    /*
-     * QR alternating pad bytes:
-     *
-     * EC 11 EC 11 ...
-     */
+    // QR alternating pad bytes:
+    //
+    // EC 11 EC 11 ...
 
     pad_toggle = 0;
 
@@ -991,9 +933,9 @@ static int qr_create_data(
 }
 
 
-/* ================================================================
- * CREATE FINAL CODEWORDS
- * ================================================================ */
+// ================================================================
+// CREATE FINAL CODEWORDS
+// ================================================================
 
 static void qr_create_codewords(const uint8_t* data, uint8_t* output)
 {
@@ -1004,11 +946,9 @@ static void qr_create_codewords(const uint8_t* data, uint8_t* output)
     int i;
     int pos;
 
-    /*
-     * Version 7 M:
-     *
-     * Four blocks, 31 data bytes each.
-     */
+    // Version 7 M:
+    //
+    // Four blocks, 31 data bytes each.
 
     for (block = 0; block < QR_NUM_BLOCKS; block++)
     {
@@ -1017,9 +957,7 @@ static void qr_create_codewords(const uint8_t* data, uint8_t* output)
     }
 
 
-    /*
-     * Interleave data codewords.
-     */
+    // Interleave data codewords.
 
     pos = 0;
 
@@ -1032,9 +970,7 @@ static void qr_create_codewords(const uint8_t* data, uint8_t* output)
     }
 
 
-    /*
-     * Interleave ECC codewords.
-     */
+    // Interleave ECC codewords.
 
     for (i = 0;  i < QR_ECC_PER_BLOCK; i++)
     {
@@ -1046,9 +982,9 @@ static void qr_create_codewords(const uint8_t* data, uint8_t* output)
 }
 
 
-/* ================================================================
- * PLACE DATA MODULES
- * ================================================================ */
+// ================================================================
+// PLACE DATA MODULES
+// ================================================================
 
 static void qr_place_data( const uint8_t* codewords)
 {
@@ -1068,9 +1004,7 @@ static void qr_place_data( const uint8_t* codewords)
     {
         int vertical;
 
-        /*
-         * Skip vertical timing column.
-         */
+        // Skip vertical timing column.
 
         if (right == 6) right--;
 
@@ -1122,9 +1056,9 @@ static void qr_place_data( const uint8_t* codewords)
 }
 
 
-/* ================================================================
- * MASKING
- * ================================================================ */
+// ================================================================
+// MASKING
+// ================================================================
 
 static int qr_mask_condition(
     int mask,
@@ -1183,11 +1117,11 @@ static void qr_apply_mask( int mask)
 }
 
 
-/* ================================================================
- * MASK PENALTY
- *
- * Used to select the best of the eight QR masks.
- * ================================================================ */
+// ================================================================
+// MASK PENALTY
+//
+// Used to select the best of the eight QR masks.
+// ================================================================
 
 static int qr_penalty(void)
 {
@@ -1420,9 +1354,9 @@ static int qr_penalty(void)
 }
 
 
-/* ================================================================
- * SELECT BEST MASK
- * ================================================================ */
+// ================================================================
+// SELECT BEST MASK
+// ================================================================
  
 static void qr_select_best_mask(void)
 {
@@ -1434,13 +1368,11 @@ static void qr_select_best_mask(void)
 
     memcpy(original,qr_matrix,sizeof(original));
 
-    /*
-     * Initialize with mask 0.
-     *
-     * This guarantees that 'best' and 'best_score'
-     * always contain a valid candidate before
-     * comparing masks 1 through 7.
-     */
+    // Initialize with mask 0.
+    //
+    // This guarantees that 'best' and 'best_score'
+    // always contain a valid candidate before
+    // comparing masks 1 through 7.
 
     memcpy(qr_matrix, original,sizeof(original));
     qr_apply_mask(0);
@@ -1476,18 +1408,16 @@ static void qr_select_best_mask(void)
      memcpy(qr_matrix, best, sizeof(best));
 }
 
-/* ================================================================
- * 128x128 1-BIT BITMAP FUNCTIONS
- * ================================================================ */
+// ================================================================
+// 128x128 1-BIT BITMAP FUNCTIONS
+// ================================================================
 
 static void bitmap_clear( unsigned char* bitmap)
 {
-    /*
-     * Internal representation:
-     *
-     * 0 = white
-     * 1 = black
-     */
+    // Internal representation:
+    //
+    // 0 = white
+    // 1 = black
 
     memset( bitmap, 0, BMP_BUFFER_SIZE);
 }
@@ -1508,9 +1438,9 @@ static void bitmap_set_black(unsigned char* bitmap, int x, int y)
 }
 
 
-/* ================================================================
- * RENDER QR MATRIX INTO 128x128 BITMAP
- * ================================================================ */
+// ================================================================
+// RENDER QR MATRIX INTO 128x128 BITMAP
+// ================================================================
 
 static void qr_render_128(unsigned char* bitmap)
 {
@@ -1523,18 +1453,16 @@ static void qr_render_128(unsigned char* bitmap)
 
     bitmap_clear(bitmap);
 
-    /*
-     * QR symbol itself:
-     *
-     * 45 * 2 = 90 pixels.
-     *
-     * Centering gives 19 pixels around the symbol.
-     *
-     * This exceeds the required four-module quiet
-     * zone:
-     *
-     * 4 modules * 2 = 8 pixels minimum.
-     */
+    // QR symbol itself:
+    //
+    // 45 * 2 = 90 pixels.
+    //
+    // Centering gives 19 pixels around the symbol.
+    //
+    // This exceeds the required four-module quiet
+    // zone:
+    //
+    // 4 modules * 2 = 8 pixels minimum.
 
     qr_pixels = QR_SIZE * QR_SCALE;
 
@@ -1570,9 +1498,9 @@ static void qr_render_128(unsigned char* bitmap)
 }
 
 
-/* ================================================================
- * PUBLIC QR ENCODER
- * ================================================================ */
+// ================================================================
+// PUBLIC QR ENCODER
+// ================================================================
 
 int QR_Encode128( const unsigned char* text, unsigned char* bitmap)
 {
@@ -1603,9 +1531,9 @@ int QR_Encode128( const unsigned char* text, unsigned char* bitmap)
 }
 
 
-/* ================================================================
- * LITTLE-ENDIAN FILE HELPERS
- * ================================================================ */
+// ================================================================
+// LITTLE-ENDIAN FILE HELPERS
+// ================================================================
 
 static void file_write_u16(FILE* fp, uint16_t value)
 {
@@ -1631,9 +1559,9 @@ unsigned char b[4];
 }
 
 
-/* ================================================================
- * WRITE WINDOWS 1-BIT BMP
- * ================================================================ */
+// ================================================================
+// WRITE WINDOWS 1-BIT BMP
+// ================================================================
 
 int QR_WriteBMP(const char* filename, const unsigned char* bitmap)
 {
@@ -1728,19 +1656,17 @@ int y;
     return 0;
 }
 
-/*
- * ================================================================
- * TOTP ENROLLMENT SUPPORT
- * ================================================================
- *
- * Generates:
- *
- *   1. 160-bit random TOTP secret
- *   2. 32-character Base32 representation
- *   3. otpauth:// provisioning URI
- *
- * The QR encoder remains independent of TOTP.
- */
+// ================================================================
+// TOTP ENROLLMENT SUPPORT
+// ================================================================
+//
+// Generates:
+//
+//   1. 160-bit random TOTP secret
+//   2. 32-character Base32 representation
+//   3. otpauth:// provisioning URI
+//
+// The QR encoder remains independent of TOTP.
 
 #include <stddef.h>
 
@@ -1753,9 +1679,7 @@ int y;
 #define TOTP_URI_MAX               120
 
 
- /*
-  * Error codes
-  */
+ // Error codes
 
 #define TOTP_OK                     0
 #define TOTP_ERROR_PARAMETER       -1
@@ -1766,24 +1690,22 @@ int y;
 #define TOTP_ERROR_CHARACTER       -6
 
 
-  /*
-   * Random-byte callback.
-   *
-   * This is intentionally hardware/platform dependent.
-   *
-   * Return:
-   *
-   *   0 = success
-   *   nonzero = failure
-  
-
-typedef int (*TOTP_RANDOM_FUNCTION)(unsigned char* buffer,unsigned int length);
-    */
+  // Random-byte callback.
+  //
+  // This is intentionally hardware/platform dependent.
+  //
+  // Return:
+  //
+  //   0 = success
+  //   nonzero = failure
+  //
+  //
+  // typedef int (*TOTP_RANDOM_FUNCTION)(unsigned char* buffer,unsigned int length);
 
 
-/* ================================================================
- * BASE32 ENCODER
- * ================================================================ */
+// ================================================================
+// BASE32 ENCODER
+// ================================================================
 
 static int TOTP_Base32Encode(
     const unsigned char* input,
@@ -1806,15 +1728,13 @@ static int TOTP_Base32Encode(
         return TOTP_ERROR_PARAMETER;
     }
 
-    /*
-     * For our 20-byte secret:
-     *
-     * 20 bytes = 160 bits
-     * 160 / 5 = 32 Base32 characters
-     */
+    // For our 20-byte secret:
+    //
+    // 20 bytes = 160 bits
+    // 160 / 5 = 32 Base32 characters
 
     if (output_size <
-        TOTP_SECRET_BASE32_LENGTH + 1)
+        ((input_length * 8U + 4U) / 5U) + 1U)  // Base32 characters + '\0'
     {
         return TOTP_ERROR_PARAMETER;
     }
@@ -1866,25 +1786,23 @@ static int TOTP_Base32Encode(
 }
 
 
-/*
- * ================================================================
- * CREATE RANDOM TOTP SECRET
- * ================================================================
- *
- * Generates exactly 20 bytes / 160 bits of cryptographically
- * secure random data.
- *
- * PC test implementation:
- *     Windows BCryptGenRandom()
- *
- * ARM implementation:
- *     Replace the body with the MCU/platform secure RNG.
- *
- * Returns:
- *      0 = success
- *     -1 = invalid parameter
- *     -2 = random generator failure
- */
+// ================================================================
+// CREATE RANDOM TOTP SECRET
+// ================================================================
+//
+// Generates exactly 20 bytes / 160 bits of cryptographically
+// secure random data.
+//
+// PC test implementation:
+//     Windows BCryptGenRandom()
+//
+// ARM implementation:
+//     Replace the body with the MCU/platform secure RNG.
+//
+// Returns:
+//      0 = success
+//     -1 = invalid parameter
+//     -2 = random generator failure
 
 int TOTP_CreateRandom(unsigned char secret[TOTP_SECRET_BYTES])
 {
@@ -1904,14 +1822,12 @@ int TOTP_CreateRandom(unsigned char secret[TOTP_SECRET_BYTES])
 
 #else
 
-    /*
-     * ARM TARGET:
-     *
-     * Replace this section with the hardware/platform
-     * cryptographically secure random source.
-     *
-     * Do NOT use rand().
-     */
+    // ARM TARGET:
+    //
+    // Replace this section with the hardware/platform
+    // cryptographically secure random source.
+    //
+    // Do NOT use rand().
 
     return -2;
 
@@ -1923,22 +1839,22 @@ int TOTP_CreateRandom(unsigned char secret[TOTP_SECRET_BYTES])
 
 
 
-/* ================================================================
- * URI CHARACTER SUPPORT
- * ================================================================
- *
- * We percent-encode characters that should not be placed directly
- * into the URI.
- *
- * This makes names such as:
- *
- *   "My Company"
- *
- * become:
- *
- *   "My%20Company"
- *
- * ================================================================ */
+// ================================================================
+// URI CHARACTER SUPPORT
+// ================================================================
+//
+// We percent-encode characters that should not be placed directly
+// into the URI.
+//
+// This makes names such as:
+//
+//   "My Company"
+//
+// become:
+//
+//   "My%20Company"
+//
+// ================================================================
 
 static int TOTP_IsUnreservedCharacter(unsigned char c)
 {
@@ -2033,34 +1949,32 @@ static int TOTP_URIAppendEncoded(char* uri,unsigned int uri_size, unsigned int* 
 }
 
 
-/*
- * ================================================================
- * CREATE TOTP ENROLLMENT URI
- * ================================================================
- *
- * Constructs:
- *
- * otpauth://totp/ISSUER:USERNAME
- * ?secret=BASE32
- * &issuer=ISSUER
- *
- * This function:
- *
- *     DOES NOT generate random numbers.
- *     DOES NOT Base32 encode the secret.
- *     DOES NOT generate the QR code.
- *
- * It only constructs the enrollment URI.
- 
-     * We intentionally omit:
-     *
-     * algorithm=SHA1
-     * digits=6
-     * period=30
-     *
-     * Those are our defined TOTP defaults.
- * ================================================================
- */
+// ================================================================
+// CREATE TOTP ENROLLMENT URI
+// ================================================================
+//
+// Constructs:
+//
+// otpauth://totp/ISSUER:USERNAME
+// ?secret=BASE32
+// &issuer=ISSUER
+//
+// This function:
+//
+//     DOES NOT generate random numbers.
+//     DOES NOT Base32 encode the secret.
+//     DOES NOT generate the QR code.
+//
+// It only constructs the enrollment URI.
+//
+// We intentionally omit:
+//
+// algorithm=SHA1
+// digits=6
+// period=30
+//
+// Those are our defined TOTP defaults.
+// ================================================================
 
 int TOTP_CreateEnrollment(
     const char* issuer,
@@ -2127,11 +2041,9 @@ int TOTP_CreateEnrollment(
 
 
 
-/*
- * ================================================================
- * SHA-1 Stuff
- * ================================================================
- */
+// ================================================================
+// SHA-1 Stuff
+// ================================================================
 typedef struct
 {
     uint32_t state[5];
@@ -2248,9 +2160,9 @@ static void SHA1_Transform( SHA1_CONTEXT* context, const unsigned char block[64]
 }
 
 
-/* ================================================================
- * SHA1 INITIALIZE
- * ================================================================ */
+// ================================================================
+// SHA1 INITIALIZE
+// ================================================================
 
 static void SHA1_Init(SHA1_CONTEXT* context)
 {
@@ -2270,9 +2182,9 @@ static void SHA1_Init(SHA1_CONTEXT* context)
 }
 
 
-/* ================================================================
- * SHA1 UPDATE
- * ================================================================ */
+// ================================================================
+// SHA1 UPDATE
+// ================================================================
 
 static void SHA1_Update(SHA1_CONTEXT* context, const unsigned char* data, unsigned int length)
 {
@@ -2298,9 +2210,9 @@ static void SHA1_Update(SHA1_CONTEXT* context, const unsigned char* data, unsign
 }
 
 
-/* ================================================================
- * SHA1 FINAL
- * ================================================================ */
+// ================================================================
+// SHA1 FINAL
+// ================================================================
 
 static void SHA1_Final( SHA1_CONTEXT* context, unsigned char digest[20])
 {
@@ -2460,22 +2372,22 @@ static void HMAC_SHA1(
 }
 
 
-/* ================================================================
- * GENERATE TOTP
- * ================================================================
- *
- * unix_time:
- *
- *     Seconds since 1970-01-01 UTC.
- *
- * Standard configuration:
- *
- *     T0     = 0
- *     period = 30 seconds
- *     digits = 6
- *     hash   = SHA-1
- *
- * ================================================================ */
+// ================================================================
+// GENERATE TOTP
+// ================================================================
+//
+// unix_time:
+//
+//     Seconds since 1970-01-01 UTC.
+//
+// Standard configuration:
+//
+//     T0     = 0
+//     period = 30 seconds
+//     digits = 6
+//     hash   = SHA-1
+//
+// ================================================================
 
 static uint32_t TOTP_Generate(
     const unsigned char secret[TOTP_SECRET_BYTES],
@@ -2501,9 +2413,7 @@ static uint32_t TOTP_Generate(
     counter = unix_time / 30; //Calculate the 30-second moving counter.
 
 
-    /*
-     * HOTP/TOTP counter is represented as an 8-byte big-endian integer.
-     */
+    // HOTP/TOTP counter is represented as an 8-byte big-endian integer.
 
     for (i = 0; i < 8; i++)
     {
@@ -2511,16 +2421,12 @@ static uint32_t TOTP_Generate(
     }
 
 
-    /*
-     * Calculate HMAC-SHA1.
-     */
+    // Calculate HMAC-SHA1.
 
     HMAC_SHA1(secret,TOTP_SECRET_BYTES,counter_bytes,8,hash);
 
 
-    /*
-     * RFC dynamic truncation.
-     */
+    // RFC dynamic truncation.
 
     offset = hash[19] & 0x0F;
 
@@ -2539,26 +2445,26 @@ static uint32_t TOTP_Generate(
 }
 
 
-/* ================================================================
- * VERIFY TOTP
- * ================================================================
- *
- * window = 0:
- *
- *     Accept current 30-second period only.
- *
- * window = 1:
- *
- *     Accept:
- *
- *       previous period
- *       current period
- *       next period
- *
- * The +/-1 window is normally preferable because
- * clocks are never perfectly synchronized.
- *
- * ================================================================ */
+// ================================================================
+// VERIFY TOTP
+// ================================================================
+//
+// window = 0:
+//
+//     Accept current 30-second period only.
+//
+// window = 1:
+//
+//     Accept:
+//
+//       previous period
+//       current period
+//       next period
+//
+// The +/-1 window is normally preferable because
+// clocks are never perfectly synchronized.
+//
+// ================================================================
 
 static int TOTP_Verify(
     const unsigned char secret[TOTP_SECRET_BYTES],
@@ -2574,9 +2480,7 @@ static int TOTP_Verify(
         uint32_t expected_code;
 
 
-        /*
-         * Avoid unsigned underflow.
-         */
+        // Avoid unsigned underflow.
 
         if (offset < 0)
         {
@@ -2608,26 +2512,56 @@ static int TOTP_Verify(
 }
 
 
-static int sanitize_userINput(char *input)
-{ 
+// Read one line from stdin.
+//
+// If the line does not fit in the buffer, the rest of it is read and
+// discarded so it cannot leak into the next read.
+//
+// Returns:
+//      0 = success
+//     -1 = EOF / read error
+//     -2 = line too long (discarded)
+static int read_line(char* buffer, int size)
+{
+    int c;
 
-  
+    if (fgets(buffer, size, stdin) == NULL) return -1;
+
+    if (strchr(buffer, '\n') != NULL) return 0;
+
+    // No newline: either the line was too long, or EOF ended it.
+    c = getchar();
+    if (c == EOF) return 0;
+    if (c == '\n') return 0; // Line exactly filled the buffer.
+
+    while (c != '\n' && c != EOF) c = getchar();
+    return -2;
+}
+
+
+static int sanitize_userINput(char *input)
+{
+
+
         int i, entered_code;
 
         for (i = 0; i < 6; i++)
         {
             if (input[i] < '0' || input[i] > '9')
             {
-                printf("\nInvalid code.\n");
-                printf("Please enter exactly six digits.\n");
-                return 0;
+                DEBUG_Print("\nInvalid code.\n");
+                DEBUG_Print("Please enter exactly six digits.\n");
+                return -1;
             }
         }
 
-        if (input[6] != '\n' && input[6] != '\0')
+        // Accept "\n", "\r\n" or end of string after the six digits.
+        i = 6;
+        if (input[i] == '\r') i++;
+        if (input[i] != '\n' && input[i] != '\0')
         {
-            printf("\nInvalid code length.\n");
-            return 0;
+            DEBUG_Print("\nInvalid code length.\n");
+            return -1;
         }
  
         entered_code = 0;
@@ -2642,50 +2576,48 @@ static int sanitize_userINput(char *input)
 	return entered_code;
 }
 
-/*
- * ================================================================
- * DEBUG: DUMP 2048-BYTE QR BITMAP TO CSV
- * ================================================================
- *
- * Creates a CSV containing the complete qr_bitmap[] as hexadecimal
- * byte values.
- *
- * Format:
- *
- * 0x00,0x00,0x3F,0x80,...
- *
- * 16 bytes are written per line. This corresponds to exactly one
- * 128-pixel bitmap row because:
- *
- *     128 pixels / 8 bits = 16 bytes
- *
- * Therefore the output contains 128 lines x 16 bytes = 2048 bytes.
- *
- * The resulting data can also be pasted directly into a C array.
- * 
-
-0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00
-0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00
-
-
-        128 pixels
-<---------------------->
-
-Byte 0                  Byte 15
-  |                        |
-  v                        v
-xxxxxxxx xxxxxxxx ... xxxxxxxx
-<------ 16 bytes ----------->
- 
-
-
- For debugging, the mismatch index is also easily converted to a bitmap row and byte position:
- index = result - 1;
-
-row = index / 16;
-byte_in_row = index % 16;
- 
- */
+// ================================================================
+// DEBUG: DUMP 2048-BYTE QR BITMAP TO CSV
+// ================================================================
+//
+// Creates a CSV containing the complete qr_bitmap[] as hexadecimal
+// byte values.
+//
+// Format:
+//
+// 0x00,0x00,0x3F,0x80,...
+//
+// 16 bytes are written per line. This corresponds to exactly one
+// 128-pixel bitmap row because:
+//
+//     128 pixels / 8 bits = 16 bytes
+//
+// Therefore the output contains 128 lines x 16 bytes = 2048 bytes.
+//
+// The resulting data can also be pasted directly into a C array.
+//
+//
+// 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00
+// 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00
+//
+//
+// 128 pixels
+// <---------------------->
+//
+// Byte 0                  Byte 15
+// |                        |
+// v                        v
+// xxxxxxxx xxxxxxxx ... xxxxxxxx
+// <------ 16 bytes ----------->
+//
+//
+//
+// For debugging, the mismatch index is also easily converted to a bitmap row and byte position:
+// index = result - 1;
+//
+// row = index / 16;
+// byte_in_row = index % 16;
+//
 int QR_DumpBitmapCSV(const char* filename, const unsigned char* bitmap)
 {
     FILE* fp;
@@ -2720,44 +2652,41 @@ int QR_DumpBitmapCSV(const char* filename, const unsigned char* bitmap)
     fclose(fp);
     return 0;
 }
-/* ================================================================
- * TEST APPLICATION
- * ================================================================ */
- /*
-
-/*
-Microsoft Authenticator TOTP Test
-=================================
-
-Generated Base32 secret:
-WTSK5HKRTH6VPM4GWQLMBCOAWDHTNFRA
-
-Enrollment URI:
-otpauth://totp/MyApp:user01?secret=WTSK5HKRTH6VPM4GWQLMBCOAWDHTNFRA&issuer=MyApp
-
-QR code written to:
-    authenticator.bmp
-
-Open authenticator.bmp and scan it
-with Microsoft Authenticator.
-
-After the account has been added,
-press ENTER to continue...
-
-
-Enter the 6-digit code currently
-displayed by Microsoft Authenticator:
-
-> 083417
-
-Unix time: 1790300000
-30-second counter: 59676666
-Calculated current TOTP: 083417
-
-******************************
-*   AUTHENTICATION PASSED    *
-******************************
-*/
+// ================================================================
+// TEST APPLICATION
+// ================================================================
+ //
+ // Microsoft Authenticator TOTP Test
+ // =================================
+ //
+ // Generated Base32 secret:
+ // WTSK5HKRTH6VPM4GWQLMBCOAWDHTNFRA
+ //
+ // Enrollment URI:
+ // otpauth://totp/MyApp:user01?secret=WTSK5HKRTH6VPM4GWQLMBCOAWDHTNFRA&issuer=MyApp
+ //
+ // QR code written to:
+ // authenticator.bmp
+ //
+ // Open authenticator.bmp and scan it
+ // with Microsoft Authenticator.
+ //
+ // After the account has been added,
+ // press ENTER to continue...
+ //
+ //
+ // Enter the 6-digit code currently
+ // displayed by Microsoft Authenticator:
+ //
+ // > 083417
+ //
+ // Unix time: 1790300000
+ // 30-second counter: 59676666
+ // Calculated current TOTP: 083417
+ //
+ // *****************************
+ //   AUTHENTICATION PASSED    *
+ // *****************************
 int main(void)
 {
     unsigned char secret[TOTP_SECRET_BYTES];
@@ -2840,20 +2769,39 @@ int main(void)
 
     fflush(stdout);
     /// user input delay
-    fgets(input,sizeof(input),stdin);
+    if (read_line(input, sizeof(input)) == -1)
+    {
+        DEBUG_Print("\nInput error.\n");
+        DEBUG_Stop();
+        return 1;
+    }
     DEBUG_Print("\n");
     DEBUG_Print("Enter the 6-digit code currently\n");
     DEBUG_Print("displayed by Microsoft Authenticator:\n\n");
     DEBUG_Print("> ");
     fflush(stdout);
 
-    if (fgets(input,sizeof(input), stdin) == NULL)
+    result = read_line(input, sizeof(input));
+    if (result == -1)
     {
         DEBUG_Print("\nInput error.\n");
         DEBUG_Stop();
         return 1;
     }
-    entered_code = sanitize_userINput(input); // Require exactly six decimal digits.
+    if (result == -2)
+    {
+        DEBUG_Print("\nInvalid code length.\n");
+        DEBUG_Stop();
+        return 1;
+    }
+    result = sanitize_userINput(input); // Require exactly six decimal digits.
+    if (result < 0)
+    {
+        DEBUG_Print("\nInvalid code entered.\n");
+        DEBUG_Stop();
+        return 1;
+    }
+    entered_code = (uint32_t)result;
     DEBUG_Print("Entered TOTP: %06u\n", (unsigned int)entered_code);
 
     unix_time =  (uint64_t)time(NULL);
@@ -2881,6 +2829,6 @@ int main(void)
     }
 
     DEBUG_Print("\nPress ENTER to exit...");
-    fgets(input, sizeof(input), stdin);
+    (void)read_line(input, sizeof(input));
     return 0;
 }
